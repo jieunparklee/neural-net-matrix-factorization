@@ -30,7 +30,7 @@ class _NNMFBase(object):
         self._init_ops()
 
         # RMSE
-        self.rmse = tf.sqrt(tf.reduce_mean(tf.square(tf.sub(self.r, self.r_target))))
+        self.rmse = tf.sqrt(tf.reduce_mean(tf.square(tf.subtract(self.r, self.r_target))))
 
     def _init_vars(self):
         raise NotImplementedError
@@ -100,14 +100,14 @@ class NNMF(_NNMFBase):
         self.Vprime_lu = tf.nn.embedding_lookup(self.Vprime, self.item_index)
 
         # MLP ("f")
-        f_input_layer = tf.concat(concat_dim=1, values=[self.U_lu, self.V_lu, tf.mul(self.Uprime_lu, self.Vprime_lu)])
+        f_input_layer = tf.concat([self.U_lu, self.V_lu, tf.multiply(self.Uprime_lu, self.Vprime_lu)], 1)
 
         _r, self.mlp_weights = build_mlp(f_input_layer, hidden_units_per_layer=self.hidden_units_per_layer)
         self.r = tf.squeeze(_r, squeeze_dims=[1])
 
     def _init_ops(self):
         # Loss
-        reconstruction_loss = tf.reduce_sum(tf.square(tf.sub(self.r_target, self.r)), reduction_indices=[0])
+        reconstruction_loss = tf.reduce_sum(tf.square(tf.subtract(self.r_target, self.r)), reduction_indices=[0])
         reg = tf.add_n([tf.reduce_sum(tf.square(self.Uprime), reduction_indices=[0,1]),
                         tf.reduce_sum(tf.square(self.U), reduction_indices=[0,1]),
                         tf.reduce_sum(tf.square(self.V), reduction_indices=[0,1]),
@@ -231,7 +231,7 @@ class SVINNMF(_NNMFBase):
         self.Vprime = q_Vprime.sample()
 
         # MLP ("f")
-        f_input_layer = tf.concat(concat_dim=1, values=[self.U, self.V, tf.mul(self.Uprime, self.Vprime)])
+        f_input_layer = tf.concat(concat_dim=1, values=[self.U, self.V, tf.multiply(self.Uprime, self.Vprime)])
 
         self.r_mu, self.mlp_weights = build_mlp(f_input_layer, hidden_units_per_layer=self.hidden_units_per_layer)
         self.r = tf.squeeze(self.r_mu, squeeze_dims=[1])
@@ -247,7 +247,7 @@ class SVINNMF(_NNMFBase):
         KL_all = KL_U + KL_Uprime + KL_V + KL_Vprime
 
         # TODO weighting of gradient, handle multiple samples
-        log_prob = -(1/(2.0*self.r_var))*tf.reduce_sum(tf.square(tf.sub(self.r_target, self.r)), reduction_indices=[0])
+        log_prob = -(1/(2.0*self.r_var))*tf.reduce_sum(tf.square(tf.subtract(self.r_target, self.r)), reduction_indices=[0])
         elbo = log_prob-(self.kl_weight*KL_all)
         self.loss = -elbo
 

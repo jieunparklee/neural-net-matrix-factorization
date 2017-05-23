@@ -35,7 +35,7 @@ def train(model, sess, saver, train_data, valid_data, batch_size, max_iters, use
     # Optimize
     prev_valid_rmse = float("Inf")
     early_stop_iters = 0
-    for i in xrange(max_iters):
+    for i in range(max_iters):
         # Run SGD
         batch = train_data.sample(batch_size) if batch_size else train_data
         model.train_iteration(batch)
@@ -165,7 +165,7 @@ if __name__ == '__main__':
         _NNMF_LAM_MIN, _NNMF_LAM_MAX = -4.0, 4.0
         _SVINNMF_VAR_MIN, _SVINNMF_VAR_MAX = -2.0, 2.0
         _SVINNMF_KL_ITER_MIN, _SVINNMF_KL_ITER_MAX = 2.0, 4.0
-        for _ in xrange(hyperparam_search_size):
+        for _ in range(hyperparam_search_size):
             if model_name == 'NNMF':
                 hyperparams_list.append({'lam': 10 ** np.random.uniform(_NNMF_LAM_MIN, _NNMF_LAM_MAX)})
             elif model_name == 'SVINNMF':
